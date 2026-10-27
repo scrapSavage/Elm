@@ -1,5 +1,6 @@
 ﻿public static class Elm
 {
+    private static readonly object _lock = new();
     public enum HazardLevel
     {
         Debug,
@@ -35,25 +36,28 @@
     public static event Action<string>? OnError;
     public static void OutputMessage(HazardLevel hazardLevel, string message)
     {
-        if (Config.UseColoredOutput)
-            Console.ForegroundColor = hazardLevel switch
-            {
-                HazardLevel.Debug => Config.DebugColor,
-                HazardLevel.Log => Config.LogColor,
-                HazardLevel.Warning => Config.WarningColor,
-                HazardLevel.Error => Config.ErrorColor,
-                _ => Config.UnknownColor
-            };
-        string ResolvedTag = hazardLevel switch
+        lock (_lock)
         {
-            HazardLevel.Debug => Config.UseAsciiFallbacks ? Config.DebugTagAscii : Config.DebugTag,
-            HazardLevel.Log => Config.UseAsciiFallbacks ? Config.LogTagAscii : Config.LogTag,
-            HazardLevel.Warning => Config.UseAsciiFallbacks ? Config.WarningTagAscii : Config.WarningTag,
-            HazardLevel.Error => Config.UseAsciiFallbacks ? Config.ErrorTagAscii : Config.ErrorTag,
-            _ => Config.UseAsciiFallbacks ? Config.UnknownTagAscii : Config.UnknownTag
-        };
-        Console.Write($"[{DateTime.Now.ToString("HH:mm:ss")}][{ResolvedTag}]: {message}\n");
-        Console.ResetColor();
+            if (Config.UseColoredOutput)
+                Console.ForegroundColor = hazardLevel switch
+                {
+                    HazardLevel.Debug => Config.DebugColor,
+                    HazardLevel.Log => Config.LogColor,
+                    HazardLevel.Warning => Config.WarningColor,
+                    HazardLevel.Error => Config.ErrorColor,
+                    _ => Config.UnknownColor
+                };
+            string ResolvedTag = hazardLevel switch
+            {
+                HazardLevel.Debug => Config.UseAsciiFallbacks ? Config.DebugTagAscii : Config.DebugTag,
+                HazardLevel.Log => Config.UseAsciiFallbacks ? Config.LogTagAscii : Config.LogTag,
+                HazardLevel.Warning => Config.UseAsciiFallbacks ? Config.WarningTagAscii : Config.WarningTag,
+                HazardLevel.Error => Config.UseAsciiFallbacks ? Config.ErrorTagAscii : Config.ErrorTag,
+                _ => Config.UseAsciiFallbacks ? Config.UnknownTagAscii : Config.UnknownTag
+            };
+            Console.Write($"[{DateTime.Now.ToString("HH:mm:ss")}][{ResolvedTag}]: {message}\n");
+            Console.ResetColor();
+        }
     }
     public static void Debug(string message)
     {
