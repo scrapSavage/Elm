@@ -63,34 +63,42 @@
             Console.ResetColor();
         }
     }
-    public static void Debug(string message)
+    public static void Debug(string message, bool attachStackTrace = false)
     {
         if (Config.MinimumReportableHazardLevel <= HazardLevel.Debug)
         {
+            if (attachStackTrace)
+                message = $"{message}\n\n{Environment.StackTrace}";
             OutputMessage(HazardLevel.Debug, message);
             OnDebug?.Invoke(message);
         }
     }
-    public static void Log(string message)
+    public static void Log(string message, bool attachStackTrace = false)
     {
         if (Config.MinimumReportableHazardLevel <= HazardLevel.Log)
         {
+            if (attachStackTrace)
+                message = $"{message}\n\n{Environment.StackTrace}";
             OutputMessage(HazardLevel.Log, message);
             OnLog?.Invoke(message);
         }
     }
-    public static void Warning(string message)
+    public static void Warning(string message, bool attachStackTrace = false)
     {
         if (Config.MinimumReportableHazardLevel <= HazardLevel.Warning)
         {
+            if (attachStackTrace)
+                message = $"{message}\n\n{Environment.StackTrace}";
             OutputMessage(HazardLevel.Warning, message);
             OnWarning?.Invoke(message);
         }
     }
-    public static void Error(string message)
+    public static void Error(string message, bool attachStackTrace = true)
     {
         if (Config.MinimumReportableHazardLevel <= HazardLevel.Error)
         {
+            if (attachStackTrace)
+                message = $"{message}\n\n{Environment.StackTrace}";
             OutputMessage(HazardLevel.Error, message);
             OnError?.Invoke(message);
         }
