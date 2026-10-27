@@ -11,6 +11,7 @@
     }
     public static class Config
     {
+        public static string LoggingFilepath = "";
         public static HazardLevel MinimumReportableHazardLevel = HazardLevel.Debug;
         public static bool UseAsciiFallbacks = false;
         public static bool UseColoredOutput = true;
@@ -55,7 +56,10 @@
                 HazardLevel.Error => Config.UseAsciiFallbacks ? Config.ErrorTagAscii : Config.ErrorTag,
                 _ => Config.UseAsciiFallbacks ? Config.UnknownTagAscii : Config.UnknownTag
             };
-            Console.Write($"[{DateTime.Now.ToString("HH:mm:ss")}][{ResolvedTag}]: {message}\n");
+            string outString = $"[{DateTime.Now.ToString("HH:mm:ss")}][{ResolvedTag}]: {message}\n";
+            if (!string.IsNullOrEmpty(Config.LoggingFilepath))
+                File.AppendAllText(Config.LoggingFilepath, outString);
+            Console.Write(outString);
             Console.ResetColor();
         }
     }
@@ -90,5 +94,18 @@
             OutputMessage(HazardLevel.Error, message);
             OnError?.Invoke(message);
         }
+    }
+    public static void BeginLoggingAt(string filepath)
+    {
+        string? directory = Path.GetDirectoryName(filepath);
+        if (!string.IsNullOrEmpty(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+        Config.LoggingFilepath = filepath;
+    }
+    public static void BeginLoggingAtRelative(string filepath)
+    {
+        BeginLoggingAt(Path.Combine(Environment.CurrentDirectory, filepath));
     }
 }
